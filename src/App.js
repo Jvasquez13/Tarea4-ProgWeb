@@ -1,25 +1,69 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from 'react'
+import Contacts from './components/Contacts'
+import Form from './components/Form'
+import './css/estilos.css';
+
+
+const URL = "http://www.raydelto.org/agenda.php"
 
 function App() {
+
+  const [postData, setPostData] = useState([])
+  const [data, setData] = useState({
+    nombre: "",
+    apellido: "",
+    telefono: ""
+  })
+
+  useEffect(() => {
+    fetch(URL)
+      .then(res => res.json())
+      .then(data => setPostData(data))
+  }, [data])
+
+  const { nombre, apellido, telefono } = data
+
+  function handleChange(e) {
+    let value = e.target.value
+    let name = e.target.name
+    setData({
+      ...data,
+      [name]: value
+    })
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    
+    fetch(URL, {
+      method: "POST",
+      body: JSON.stringify({
+        "nombre": nombre,
+        "apellido": apellido,
+        "telefono": telefono
+      })
+    })
+    setData({
+      nombre: "",
+      apellido: "",
+      telefono: ""
+    })
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <div className='main_container'>
+        <Form 
+          handleSubmit={handleSubmit}
+          handleChange={handleChange}
+          data={data}
+        />
+        <Contacts 
+          postData={postData}
+        />
+      </div>
+  </>
+  )
 }
 
 export default App;
